@@ -60,8 +60,8 @@ npm start
 ```
 
 
-## 赞助商
+## Sponsors
 
-[![image](https://yxvm.com/assets/img/logo.png)](https://yxvm.com/)
+[![image](https://github.com/user-attachments/assets/dae292e1-3a99-4f6b-b423-4b973ef0d49b)](https://yxvm.com/)
 
-感谢 <a href="https://yxvm.com/"><image width="200" src="https://yxvm.com/assets/img/logo.png"></a> 和 [NodeSupport](https://github.com/NodeSeekDev/NodeSupport) 赞助了本项目
+[NodeSupport](https://github.com/NodeSeekDev/NodeSupport) 赞助了本项目
