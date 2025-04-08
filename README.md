@@ -60,31 +60,8 @@ npm start
 ```
 
 
-## 更新记录
+## 赞助商
 
-<details>
-<summary>展开</summary>
+[![image](https://yxvm.com/assets/img/logo.png)](https://yxvm.com/)
 
-##### 很久之前
-
-1. 使用Kotlin实现了master分支
-
-##### 过了一段时间
-
-1. 使用Node.js重构
-2. 自动清理空间
-3. 支持视频标题作为文件名
-4. 添加黑名单, 以及Cookies, 避免Youtube 429响应
-
-##### 后来
-
-1. 添加外挂字幕下载功能
-2. 支持解析BiliBili
-
-##### 接着
-
-1. 下载引擎替换为yt-dlp
-2. 支持解析BiliBili字幕和弹幕
-3. 支持显示标题和封面
-
-</details>
+感谢 <a href="https://yxvm.com/"><image width="200" src="https://yxvm.com/assets/img/logo.png"></a> 和 [NodeSupport](https://github.com/NodeSeekDev/NodeSupport) 赞助了本项目
