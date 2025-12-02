@@ -370,7 +370,7 @@ function task() {
                 try {
                     let cmd = `yt-dlp --print-json --skip-download ${config.cookie !== undefined ? `--cookies ${config.cookie}` : ''} '${msg.url}' 2> /dev/null`
                     console.log('解析视频, 命令:', cmd);
-                    rs = child_process.execSync(cmd).toString();
+                    rs = child_process.execSync(cmd, { maxBuffer: 10 * 1024 * 1024 }).toString();  // 10MB 缓冲区
                     try {
                         rs = JSON.parse(rs);
                     } catch (error) {
