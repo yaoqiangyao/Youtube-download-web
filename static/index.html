@@ -433,7 +433,7 @@
                         if (window.sub_type === 'native' && el.name === 'nativeSub') subs.push(el.value);
                         if (window.sub_type === 'auto' && el.name === 'autoSub') subs.push(el.value);
                     });
-                    uri = recode_uri + `&format=${ vid }x${ aid }&subs=${subs.join(',')}`
+                    uri = recode_uri + `&format=${ vid ?? '' }${ vid && aid ? 'x' : '' }${ aid ?? '' }&subs=${subs.join(',')}`
                     if (recode !== "auto") uri += `&recode=${ recode }`
                     console.log(`正在请求${ uri }`)
                     postDownload(uri)
