@@ -66,6 +66,7 @@ function main() {
 
         let y2b = url.match(/^https?:\/\/(?:youtu.be\/|(?:www|m).youtube.com\/(?:watch|shorts)(?:\/|\?v=))([\w-]{11})$/);
         let bilibili = url.match(/^https?:\/\/(?:www\.|m\.)?bilibili\.com\/video\/([\w\d]{11,14})\/?(?:\?p=(\d+))?$/);
+        let xcom = url.match(/^https?:\/\/(?:www)?x\.com\/[^\/]+\/status\/(\d+)$/);
         let website;
         switch (true) {
             case y2b != null:
@@ -73,6 +74,9 @@ function main() {
                 break;
             case bilibili != null:
                 website = 'bilibili';
+                break;
+            case xcom != null:
+                website = 'xcom';
                 break;
         }
         if (!!! website) {
@@ -90,13 +94,13 @@ function main() {
             // console.log(JSON.stringify(msg, null, 1));
             res.send(msg);
         });
-        thread.postMessage({ op: 'parse', website, url, videoID: (y2b || bilibili)[1], p: bilibili?.[2] });
+        thread.postMessage({ op: 'parse', website, url, videoID: (y2b || bilibili || xcom)[1], p: bilibili?.[2] });
     });
 
     let queue = [];
     app.get('/y2b/download', (req, res) => {
         let { website, v, p, format, recode, subs } = req.query;
-        if (!!!v.match(/^[\w-]{11,14}$/))
+        if (!!!v.match(/^[\w-]{11,14}$/) && (website == 'xcom' && !!!v.match(/^\d+$/)))
             return res.send({ "error": "Qurey参数v错误: 请提供一个正确的Video ID", "success": false });
 
         if (p && !!!p.match(/^[\d]+$/))
@@ -370,7 +374,7 @@ function task() {
                 try {
                     let cmd = `yt-dlp --print-json --skip-download ${config.cookie !== undefined ? `--cookies ${config.cookie}` : ''} '${msg.url}' 2> /dev/null`
                     console.log('解析视频, 命令:', cmd);
-                    rs = child_process.execSync(cmd, { maxBuffer: 10 * 1024 * 1024 }).toString();  // 10MB 缓冲区
+		    rs = child_process.execSync(cmd, { maxBuffer: 10 * 1024 * 1024 }).toString();  // 10MB 缓冲区
                     try {
                         rs = JSON.parse(rs);
                     } catch (error) {
