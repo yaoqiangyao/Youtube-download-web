@@ -66,7 +66,7 @@ function main() {
 
         let y2b = url.match(/^https?:\/\/(?:youtu.be\/|(?:www|m).youtube.com\/(?:watch|shorts)(?:\/|\?v=))([\w-]{11})$/);
         let bilibili = url.match(/^https?:\/\/(?:www\.|m\.)?bilibili\.com\/video\/([\w\d]{11,14})\/?(?:\?p=(\d+))?$/);
-        let xcom = url.match(/^https?:\/\/(?:www)?x\.com\/[^\/]+\/status\/(\d+)$/);
+        let xcom = url.match(/^https?:\/\/(?:www)?x\.com\/[^\/]+\/status\/(\d+)(?:\/video\/(\d+))?$/);
         let website;
         switch (true) {
             case y2b != null:
@@ -94,7 +94,7 @@ function main() {
             // console.log(JSON.stringify(msg, null, 1));
             res.send(msg);
         });
-        thread.postMessage({ op: 'parse', website, url, videoID: (y2b || bilibili || xcom)[1], p: bilibili?.[2] });
+        thread.postMessage({ op: 'parse', website, url, videoID: (y2b || bilibili || xcom)[1], p: (bilibili || xcom)?.[2] });
     });
 
     let queue = [];
@@ -367,25 +367,39 @@ function task() {
             } // case subtitle end
 
             case 'parse': {
+                let { website, url, videoID, p } = msg;
                 let audios = [], videos = [];
                 let bestAudio = {}, bestVideo = {};
 
                 let rs = { title: '', thumbnail: '', formats: [] };
                 try {
-                    let cmd = `yt-dlp --print-json --skip-download ${config.cookie !== undefined ? `--cookies ${config.cookie}` : ''} '${msg.url}' 2> /dev/null`
+                    let cmd = `yt-dlp --print-json --skip-download ${config.cookie !== undefined ? `--cookies ${config.cookie}` : ''} '${getWebsiteUrl(website, videoID, p)}' 2> /dev/null`
                     console.log('解析视频, 命令:', cmd);
-		    rs = child_process.execSync(cmd, { maxBuffer: 10 * 1024 * 1024 }).toString();  // 10MB 缓冲区
-                    try {
-                        rs = JSON.parse(rs);
-                    } catch (error) {
-                        let cmd = `yt-dlp --print-json --skip-download ${config.cookie !== undefined ? `--cookies ${config.cookie}` : ''} '${msg.url}?p=1' 2> /dev/null`;
-                        console.log('尝试分P, 命令:', cmd);
-                        rs = child_process.execSync(cmd).toString();
-                        rs = JSON.parse(rs);
-                        msg.p = '1';
-                        msg.url = `${msg.url}?p=1`;
+		            rs = child_process.execSync(cmd, { maxBuffer: 10 * 1024 * 1024 }).toString();  // 10MB 缓冲区
+                    switch (website) {
+                        case 'xcom': {
+                            let tmp = rs.split('\n').filter(it => it != '');
+                            rs = JSON.parse(tmp[p ? (Number(p) - 1) : 0]);
+                            if (!p && tmp.length > 1) {
+                                msg.p = '1';
+                                msg.url = getWebsiteUrl(website, videoID, msg.p);
+                            }
+                            break;
+                        }
+                        default: {
+                            try {
+                                rs = JSON.parse(rs);
+                            } catch (error) {
+                                let cmd = `yt-dlp --print-json --skip-download ${config.cookie !== undefined ? `--cookies ${config.cookie}` : ''} '${msg.url}?p=1' 2> /dev/null`;
+                                console.log('尝试分P, 命令:', cmd);
+                                rs = child_process.execSync(cmd).toString();
+                                rs = JSON.parse(rs);
+                                msg.p = '1';
+                                msg.url = `${msg.url}?p=1`;
+                            }
+                            console.log('解析完成:', rs.title, msg.url);
+                        }
                     }
-                    console.log('解析完成:', rs.title, msg.url);
                 } catch (error) {
                     console.log(error.toString());
                     worker_threads.parentPort.postMessage({
@@ -438,10 +452,13 @@ function task() {
                 let cmd = //`cd '${__dirname}' && (cd tmp > /dev/null || (mkdir tmp && cd tmp)) &&` +
                     `yt-dlp  ${config.cookie !== undefined ? `--cookies ${config.cookie}` : ''} ${getWebsiteUrl(website, videoID, p)} -f ${format.replace('x', '+')} ` +
                     `-o '${fullpath}/${videoID}.%(ext)s' ${recode !== undefined ? `--recode ${recode}` : ''} -k --write-info-json`;
+                // if (website == 'xcom') cmd += ` --playlist-items ${p ?? 1}`; // 可能导致dest捕获异常
+                if (website == 'xcom') cmd += ` --no-playlist`;
                 console.log('下载视频, 命令:', cmd);
                 try {
                     let dest = 'Unknown dest';
                     let ps = child_process.execSync(cmd).toString().split('\n');
+                    // let regex = new RegExp(`^\\[download\\].*${fullpath}/(${videoID}\\.[\\w]+).*$`);
                     let regex = new RegExp(`^.*${fullpath}/(${videoID}\\.[\\w]+).*$`);
                     ps.forEach(it => {
                         console.log(it);

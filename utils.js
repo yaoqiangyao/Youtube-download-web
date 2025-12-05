@@ -8,6 +8,10 @@ function getWebsiteUrl(website, id, p) {
             return `https://youtu.be/${id}`;
         case 'bilibili':
             return `https://www.bilibili.com/video/${id}${p ? `?p=${p}` : ''}`;
+        case 'xcom':
+            if (p)
+              return `https://x.com/i/status/${id}/video/${p ? p : 1}`;
+            return `https://x.com/i/status/${id}`;
     }
 }
 
