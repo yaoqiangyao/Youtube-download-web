@@ -12,6 +12,8 @@ function getWebsiteUrl(website, id, p) {
             if (p)
               return `https://x.com/i/status/${id}/video/${p ? p : 1}`;
             return `https://x.com/i/status/${id}`;
+        default:
+            return website;
     }
 }
 

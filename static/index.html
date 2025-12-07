@@ -86,7 +86,7 @@
     window.sub_type = 'native'; // 字幕类型
     $(() => {
         let query = new URL(document.location.href).searchParams.get('url');
-        query = decodeURIComponent(query.replace('y2b', 'youtube').replace('y2', 'youtu')); // 还原y2b视频地址
+        query = query && decodeURIComponent(query.replace('y2b', 'youtube').replace('y2', 'youtu')); // 还原y2b视频地址
         url.value = query;
         query && document.querySelector('form').submit();
     })
@@ -127,10 +127,10 @@
 
     /** 代理封面图片 */
     function getProxyImg(src) {
-        if (src.startsWith('https://i.ytimg.com/') || src.match(/^https?:\/\/i\d\.hdslb\.com\//)) {
+        if (src?.startsWith('https://i.ytimg.com/') || src?.match(/^https?:\/\/i\d\.hdslb\.com\//)) {
             return '/pxy?url=' + src;
         }
-        return src;
+        return src ?? '';
     }
 
     // AJAX完成, 填充表单

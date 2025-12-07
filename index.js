@@ -67,6 +67,7 @@ function main() {
         let y2b = url.match(/^https?:\/\/(?:youtu.be\/|(?:www|m).youtube.com\/(?:watch|shorts)(?:\/|\?v=))([\w-]{11})$/);
         let bilibili = url.match(/^https?:\/\/(?:www\.|m\.)?bilibili\.com\/video\/([\w\d]{11,14})\/?(?:\?p=(\d+))?$/);
         let xcom = url.match(/^https?:\/\/(?:www)?x\.com\/[^\/]+\/status\/(\d+)(?:\/video\/(\d+))?$/);
+        let m3u8 = url.match(/^https?:\/\/[\w\d\_\/\.\-]+\/(.+)\.m3u8$/);
         let website;
         switch (true) {
             case y2b != null:
@@ -78,6 +79,8 @@ function main() {
             case xcom != null:
                 website = 'xcom';
                 break;
+            case m3u8 != null:
+                website = url;
         }
         if (!!! website) {
             console.log('reject');
@@ -94,7 +97,7 @@ function main() {
             // console.log(JSON.stringify(msg, null, 1));
             res.send(msg);
         });
-        thread.postMessage({ op: 'parse', website, url, videoID: (y2b || bilibili || xcom)[1], p: (bilibili || xcom)?.[2] });
+        thread.postMessage({ op: 'parse', website, url, videoID: (y2b || bilibili || xcom || m3u8)[1], p: (bilibili || xcom)?.[2] });
     });
 
     let queue = [];
